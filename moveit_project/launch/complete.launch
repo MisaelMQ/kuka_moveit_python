@@ -1,0 +1,5 @@
+<launch>
+    <!-- My Package launch file -->   
+    <include file="$(find moveit_project)/launch/rviz_moveit.launch"></include>
+    <include file="$(find moveit_project)/launch/code_project.launch"></include>
+</launch>
