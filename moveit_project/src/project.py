@@ -5,6 +5,8 @@ import copy
 import rospy
 import moveit_commander
 import moveit_msgs.msg
+import geometry_msgs.msg
+import math
 
 class Mazinger():
     def __init__(self):
@@ -144,9 +146,40 @@ class Mazinger():
         # Ensuring no Residual Movement
         self.move_group.stop()
 
+        # For checking if goal position has been reached
+        current_joints = self.move_group.get_current_joint_values()
+        return self.all_close(joint_goal, current_joints, 0.01)
+
     def execute_plan(self, plan):
         # Executing Plan previously Generated
         self.move_group.execute(plan, wait=True)
+
+    def all_close(self, goal, actual, tolerance):
+        # Checking if goal is a list
+        if type(goal) is list:
+            for index in range(len(goal)):
+                if abs(actual[index] - goal[index]) > tolerance:
+                    return False
+
+        # Checking if type of variable is correct
+        elif type(goal) is geometry_msgs.msg.PoseStamped:
+            return self.all_close(goal.pose, actual.pose, tolerance)
+
+        # Checking tolerance between both poses
+        elif type(goal) is geometry_msgs.msg.Pose:
+            # Extracting information for current and goal pose 
+            x0, y0, z0, qx0, qy0, qz0, qw0 = moveit_commander.pose_to_list(actual)
+            x1, y1, z1, qx1, qy1, qz1, qw1 = moveit_commander.pose_to_list(goal)
+            
+            # Obtaining Euclidean Distances
+            d = math.dist((x1, y1, z1), (x0, y0, z0))
+
+            # Obtaining Angle between Poses
+            cos_phi_half = math.fabs(qx0 * qx1 + qy0 * qy1 + qz0 * qz1 + qw0 * qw1)
+            
+            return d <= tolerance and cos_phi_half >= math.cos(tolerance / 2.0)
+
+        return True
 
     def shutdownhook(self):
         # Going to Start Values if Ctrl+C is pressed
