@@ -1,0 +1,4 @@
+<launch>
+    <!-- My Package launch file -->   
+    <include file="$(find kuka_moveit)/launch/demo.launch"></include>
+</launch>

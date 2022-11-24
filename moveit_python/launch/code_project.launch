@@ -1,0 +1,5 @@
+<launch>
+    <!-- My Package launch file -->
+    <node pkg="moveit_python" type="project.py" name="move_kuka_python"  output="screen">
+    </node>
+</launch>
